@@ -3,7 +3,7 @@ from simulator import Simulator, CellState
 
 
 def main():
-    simulator = Simulator(10, 10)
+    simulator = Simulator(10, 10, (0,0))
     renderer = Renderer()
 
     # Block: Should stay alive (in conway)

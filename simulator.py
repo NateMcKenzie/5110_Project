@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum
+import math
 
 
 class CellState(Enum):
@@ -9,34 +10,35 @@ class CellState(Enum):
 
 
 class Simulator:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, exit: (int,int)):
         self.width = width
         self.height = height
+        self.__exit = exit
+        
         self.__board = []
-        for row in range(height):
-            self.__board.append([CellState.DEAD] * width)
+        for x in range(width):
+            self.__board.append([])
+            for y in range(height):
+                distance = math.sqrt((exit[0] - x)**2 + (exit[1] - y)**2)
+                self.__board[-1].append((CellState.DEAD, distance))
 
     def update(self):
-        # Put in Conway's Game of Life for now to see how it works
-        swap_board = deepcopy(self.__board)
-
-        for row in range(self.height):
-            for col in range(self.width):
-                neighbors = 0
-                for col_neighbor in range(-1, 2):
-                    for row_neighbor in range(-1, 2):
-                        if not (row_neighbor == 0 and col_neighbor == 0):
-                            neighbor_cell = self.getCell(col + col_neighbor, row + row_neighbor)
-                            if neighbor_cell != CellState.DEAD:
-                                neighbors += 1
-
-                if self.getCell(col, row) != CellState.DEAD and neighbors < 2:
-                    swap_board[row][col] = CellState.DEAD
-                elif self.getCell(col, row) != CellState.DEAD and neighbors > 3:
-                    swap_board[row][col] = CellState.DEAD
-                elif self.getCell(col, row) == CellState.DEAD and neighbors == 3:
-                    swap_board[row][col] = CellState.MEAN
-        self.__board = deepcopy(swap_board)
+        pass
+        # Go through each cell
+            # If there is a person there (KIND or MEAN)
+                # Assign probabilities to cells around them according to distance to exit
+                # TODO: Should probably pre-calculate and store these distances in the board itself
+                # Randomly pick one to go to
+                # Somehow indicate that this cell has +1 KIND/MEAN trying to enter it
+        # Go through cells again
+            # Determine who is trying to come into cell
+                # If no one: change nothing.
+                # If one person: They come in.
+                # If multiple KIND people: They have equal chance of moving in.
+                # If 1 MEAN and some KIND: MEAN goes in.
+                # If multiple MEAN: They have probability of moving in.
+            # Mark cell coming from as DEAD, mark cell moving to according to winner.
+            # Those who don't win have to re-evaluate if they should be MEAN or KIND
 
     def setCell(self, x: int, y: int, state: CellState):
         if (0 <= x < self.width) and (0 <= y < self.height):
