@@ -12,7 +12,7 @@ class FancyRenderer:
         for row in range(simulator.height):
             for col in range(simulator.width):
                 char = simulator.getCell(col, row)
-                print(char, file=debug)
-                self.window.addch(row, col, " " if char[0] is CellState.DEAD else "o")
+                self.window.addch(row, col, " " if char is CellState.DEAD else "o")
         debug.close()
         self.window.refresh()
+        curses.napms(100)
