@@ -1,10 +1,10 @@
-from renderer import Renderer
+from basicRenderer import BasicRenderer
 from simulator import Simulator, CellState
 
 
 def main():
     simulator = Simulator(10, 10, (0,0))
-    renderer = Renderer()
+    renderer = BasicRenderer()
 
     # Block: Should stay alive (in conway)
     simulator.setCell(1, 2, CellState.KIND)

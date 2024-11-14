@@ -1,7 +1,7 @@
 from simulator import Simulator, CellState
 
 
-class Renderer:
+class BasicRenderer:
     def render(self, simulator: Simulator):
         character = ""
         for row in range(simulator.height):
