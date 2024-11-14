@@ -1,10 +1,11 @@
 from basicRenderer import BasicRenderer
+from fancyRenderer import FancyRenderer
 from simulator import Simulator, CellState
 
 
 def main():
     simulator = Simulator(10, 10, (0,0))
-    renderer = BasicRenderer()
+    renderer = FancyRenderer()
 
     # Block: Should stay alive (in conway)
     simulator.setCell(1, 2, CellState.KIND)
@@ -20,7 +21,6 @@ def main():
 
     for i in range(50):
         simulator.update()
-        print("============")
         renderer.render(simulator)
 
 

@@ -1,10 +1,18 @@
 from simulator import Simulator, CellState
+import curses
 
 
 class FancyRenderer:
-    def render(self, simulator: Simulator):
-        move_cursor(0,0)
-        print("abc")
+    def __init__(self):
+        self.window = curses.initscr()
 
-    def move_cursor(x: int, y: int):
-        print(f"\033[<{y}>;<{x}>f")
+    def render(self, simulator: Simulator):
+        debug = open("debug", "w")
+        self.window.clear()
+        for row in range(simulator.height):
+            for col in range(simulator.width):
+                char = simulator.getCell(col, row)
+                print(char, file=debug)
+                self.window.addch(row, col, " " if char[0] is CellState.DEAD else "o")
+        debug.close()
+        self.window.refresh()

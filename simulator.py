@@ -20,7 +20,7 @@ class Simulator:
             self.__board.append([])
             for y in range(height):
                 distance = math.sqrt((exit[0] - x)**2 + (exit[1] - y)**2)
-                self.__board[-1].append((CellState.DEAD, distance))
+                self.__board[-1].append([CellState.DEAD, distance])
 
     def update(self):
         pass
@@ -42,7 +42,7 @@ class Simulator:
 
     def setCell(self, x: int, y: int, state: CellState):
         if (0 <= x < self.width) and (0 <= y < self.height):
-            self.__board[y][x] = state
+            self.__board[y][x][0] = state
 
     def getCell(self, x: int, y: int):
         if (0 <= x < self.width) and (0 <= y < self.height):
