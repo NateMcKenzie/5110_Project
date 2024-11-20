@@ -9,9 +9,24 @@ class FancyRenderer:
 
     def render(self, simulator: Simulator):
         self.window.clear()
+        kind_count = 0
+        mean_count = 0
         for row in range(simulator.height):
             for col in range(simulator.width):
-                char = simulator.getCell(col, row)
-                self.window.addch(row, col, " " if char is CellState.DEAD else "o")
+                cell_state = simulator.getCell(col, row)
+                char = " "
+                match cell_state:
+                    case CellState.KIND:
+                        kind_count += 1
+                        char = "+"
+                    case CellState.MEAN:
+                        mean_count += 1
+                        char = "-"
+                self.window.addch(row, col, char)
+        total_cells = simulator.height * simulator.width
+        self.window.addstr(row+1, 0, "0" * int(kind_count/total_cells * 100 * 4))
+        self.window.addstr(row+2, 0, "0" * int(mean_count/total_cells * 100 * 4))
+        self.window.addstr(row+3, 0, f"TOTAL KIND: {kind_count}")
+        self.window.addstr(row+4, 0, f"TOTAL MEAN: {mean_count}")
         self.window.refresh()
-        curses.napms(300)
+        curses.napms(1000)

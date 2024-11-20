@@ -43,6 +43,7 @@ class Simulator:
                     swap_board[row][col] = CellState.DEAD
                 elif self.getCell(col, row) == CellState.DEAD and neighbors == 3:
                     swap_board[row][col] = CellState.MEAN
+        self.__board = swap_board
 
     def setCell(self, x: int, y: int, state: CellState):
         if (0 <= x < self.width) and (0 <= y < self.height):

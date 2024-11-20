@@ -12,6 +12,7 @@ def main():
     simulator.setCell(1, 3, CellState.KIND)
     simulator.setCell(2, 2, CellState.KIND)
     simulator.setCell(2, 3, CellState.KIND)
+    simulator.setCell(3, 3, CellState.KIND)
 
     # Blinker: Should blink (in conway)
     simulator.setCell(6, 4, CellState.KIND)
