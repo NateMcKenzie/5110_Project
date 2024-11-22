@@ -82,5 +82,3 @@ class Simulator:
                     self.mean_count += 1
                 elif cell == CellState.KIND:
                     self.kind_count += 1
-
-

@@ -4,7 +4,7 @@ from simulator import Simulator, CellState
 
 
 def main():
-    simulator = Simulator(20, 20, (0,0))
+    simulator = Simulator(20, 20, (0, 0))
     renderer = FancyRenderer()
 
     simulator.setCell(1, 2, CellState.KIND)
@@ -32,5 +32,5 @@ def main():
     simulator.logger.save()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

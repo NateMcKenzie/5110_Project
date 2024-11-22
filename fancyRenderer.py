@@ -4,9 +4,10 @@ import curses
 
 class FancyRenderer:
     BAR_WIDTH = 50
+
     def __init__(self):
         curses.initscr()
-        curses.curs_set(0) # 0=invisible
+        curses.curs_set(0)  # 0=invisible
 
     def render(self, simulator: Simulator):
         curses.wrapper(self.wrapped_render, simulator)
@@ -33,9 +34,9 @@ class FancyRenderer:
         kind_bar = ("=" * kind_size) + (" " * (self.BAR_WIDTH - kind_size))
         mean_bar = ("=" * mean_size) + (" " * (self.BAR_WIDTH - mean_size))
 
-        window.addstr(row+1, 0, "_" * (self.BAR_WIDTH + 7))
-        window.addstr(row+2, 0, "KIND [" + kind_bar + "]")
-        window.addstr(row+3, 0, "MEAN [" + mean_bar + "]")
-        window.addstr(row+4, 0, f"TOTAL KIND: {kind_count}")
-        window.addstr(row+5, 0, f"TOTAL MEAN: {mean_count}")
+        window.addstr(row + 1, 0, "_" * (self.BAR_WIDTH + 7))
+        window.addstr(row + 2, 0, "KIND [" + kind_bar + "]")
+        window.addstr(row + 3, 0, "MEAN [" + mean_bar + "]")
+        window.addstr(row + 4, 0, f"TOTAL KIND: {kind_count}")
+        window.addstr(row + 5, 0, f"TOTAL MEAN: {mean_count}")
         window.refresh()
