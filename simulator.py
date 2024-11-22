@@ -1,6 +1,7 @@
 from copy import deepcopy
 from enum import Enum
 import math
+import random
 
 
 class CellState(Enum):
@@ -48,7 +49,11 @@ class Simulator:
                 elif self.getCell(col, row) != CellState.DEAD and neighbors > 3:
                     swap_board[row][col] = CellState.DEAD
                 elif self.getCell(col, row) == CellState.DEAD and neighbors == 3:
-                    swap_board[row][col] = CellState.MEAN
+                    # Pick one to make it interesting
+                    if random.randint(0, 1):
+                        swap_board[row][col] = CellState.MEAN
+                    else:
+                        swap_board[row][col] = CellState.KIND
 
         self.__board = swap_board
         self.count_states()

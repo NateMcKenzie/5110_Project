@@ -1,24 +1,27 @@
 import matplotlib.pyplot as plt
+import os
+from pathlib import Path
 
 
 class Logger:
     def __init__(self, log_path):
-        self.__log = open(log_path, "w")
+        self.__log_path = Path(log_path)
         self.__kind_history = []
         self.__mean_history = []
 
-    def __del__(self):
-        self.__log.close()
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
 
     def logStep(self, kind, mean):
         self.__kind_history.append(kind)
         self.__mean_history.append(mean)
 
     def save(self):
-        for i in range(len(self.__kind_history)):
-            print(f"===== Step {i} =====", file=self.__log)
-            print(f"Kind: {self.__kind_history[i]}", file=self.__log)
-            print(f"Mean: {self.__mean_history[i]}", file=self.__log)
+        with open(self.__log_path.joinpath("log.txt"), "w") as log:
+            for i in range(len(self.__kind_history)):
+                print(f"===== Step {i} =====", file=log)
+                print(f"Kind: {self.__kind_history[i]}", file=log)
+                print(f"Mean: {self.__mean_history[i]}", file=log)
 
     def plot(self):
         """
@@ -41,6 +44,9 @@ class Logger:
         ax1.set_title("Kind vs Mean")
         ax1.legend()
         ax1.grid(True)
+        # Set integer ticks for x-axis
+        ax1.set_xticks(steps)
+        ax1.set_xticklabels([str(i) for i in steps])
 
         # Plot 2: Relationship between Kind and Mean
         ax2.scatter(self.__kind_history, self.__mean_history, alpha=0.5)
@@ -59,5 +65,5 @@ class Logger:
         plt.tight_layout()
 
         # Save the plots
-        plt.savefig("plots.png")
+        plt.savefig(self.__log_path.joinpath("plots.png"))
         plt.close()

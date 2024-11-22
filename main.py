@@ -1,13 +1,30 @@
+import argparse
+
 from basicRenderer import BasicRenderer
 from fancyRenderer import FancyRenderer
 from simulator import Simulator, CellState
 from logger import Logger
 
 
-def main():
+def arg_setup():
+    parser = argparse.ArgumentParser(
+        prog="Evacuation Simulator",
+        description="Watch how kind or mean people are in evacuations",
+    )
+    parser.add_argument(
+        "output_dir",
+        default="output",
+        nargs="?",
+        help="Directory path where output files will be saved",
+    )
+    parser.add_argument("-f", "--fancy", action="store_true", help="Enable fancy renderer")
+    return parser.parse_args()
+
+
+def main(args):
     simulator = Simulator(20, 20, (0, 0))
-    renderer = FancyRenderer()
-    logger = Logger("log.txt")
+    renderer = FancyRenderer() if args.fancy else BasicRenderer()
+    logger = Logger(args.output_dir)
 
     simulator.setCell(1, 2, CellState.KIND)
     simulator.setCell(1, 3, CellState.KIND)
@@ -37,4 +54,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = arg_setup()
+    main(args)

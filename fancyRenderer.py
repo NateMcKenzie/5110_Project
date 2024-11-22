@@ -25,7 +25,7 @@ class FancyRenderer:
                         char = "-"
                 window.addch(row, col, char)
         self.show_stats(window, row, simulator.kind_count, simulator.mean_count)
-        curses.napms(1000)
+        curses.napms(900)
 
     def show_stats(self, window, row, kind_count, mean_count):
         total_alive = kind_count + mean_count
