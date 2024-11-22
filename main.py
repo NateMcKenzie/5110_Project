@@ -1,11 +1,13 @@
 from basicRenderer import BasicRenderer
 from fancyRenderer import FancyRenderer
 from simulator import Simulator, CellState
+from logger import Logger
 
 
 def main():
     simulator = Simulator(20, 20, (0, 0))
     renderer = FancyRenderer()
+    logger = Logger("log.txt")
 
     simulator.setCell(1, 2, CellState.KIND)
     simulator.setCell(1, 3, CellState.KIND)
@@ -28,9 +30,10 @@ def main():
     for i in range(20):
         simulator.update()
         renderer.render(simulator)
+        logger.logStep(simulator.kind_count, simulator.mean_count)
 
-    simulator.logger.save()
-    simulator.logger.plot()
+    logger.save()
+    logger.plot()
 
 
 if __name__ == "__main__":

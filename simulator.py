@@ -2,8 +2,6 @@ from copy import deepcopy
 from enum import Enum
 import math
 
-from logger import Logger
-
 
 class CellState(Enum):
     DEAD = 0
@@ -28,7 +26,6 @@ class Simulator:
         # Stats and logging
         self.kind_count = 0
         self.mean_count = 0
-        self.logger = Logger("log.txt")
 
     def update(self):
         # Put in Conway's Game of Life for now to see how it works
@@ -55,7 +52,6 @@ class Simulator:
 
         self.__board = swap_board
         self.count_states()
-        self.logger.logStep(self.kind_count, self.mean_count)
 
     def setCell(self, x: int, y: int, state: CellState):
         if (0 <= x < self.width) and (0 <= y < self.height):
