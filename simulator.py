@@ -33,8 +33,6 @@ class Simulator:
     def update(self):
         # Put in Conway's Game of Life for now to see how it works
         swap_board = deepcopy(self.__board)
-        self.kind_count = 0
-        self.mean_count = 0
 
         for row in range(self.height):
             for col in range(self.width):
@@ -55,20 +53,13 @@ class Simulator:
                 elif self.getCell(col, row) == CellState.DEAD and neighbors == 3:
                     swap_board[row][col] = CellState.MEAN
 
-                if swap_board[row][col] == CellState.MEAN:
-                    self.mean_count += 1
-                elif swap_board[row][col] == CellState.KIND:
-                    self.kind_count += 1
-
         self.__board = swap_board
-
+        self.count_states()
         self.logger.logStep(self.kind_count, self.mean_count)
 
     def setCell(self, x: int, y: int, state: CellState):
         if (0 <= x < self.width) and (0 <= y < self.height):
             self.__board[y][x] = state
-            if state == CellState.KIND: self.kind_count += 1
-            elif state == CellState.MEAN: self.mean_count += 1
 
     def getCell(self, x: int, y: int):
         if (0 <= x < self.width) and (0 <= y < self.height):
@@ -79,3 +70,17 @@ class Simulator:
         if (0 <= x < self.width) and (0 <= y < self.height):
             return self.__distances[y][x]
         return float("inf")
+
+    # Can do this as we go, but it gets a little clunky with the swap board and everything.
+    # This is Python so who cares about one more count.
+    def count_states(self):
+        self.kind_count = 0
+        self.mean_count = 0
+        for row in self.__board:
+            for cell in row:
+                if cell == CellState.MEAN:
+                    self.mean_count += 1
+                elif cell == CellState.KIND:
+                    self.kind_count += 1
+
+

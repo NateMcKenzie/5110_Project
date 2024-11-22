@@ -22,6 +22,7 @@ def main():
     simulator.setCell(6, 4, CellState.KIND)
     simulator.setCell(6, 5, CellState.KIND)
     simulator.setCell(6, 6, CellState.KIND)
+    simulator.count_states()
     renderer.render(simulator)
 
     for i in range(20):
