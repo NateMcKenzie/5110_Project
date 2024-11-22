@@ -1,10 +1,10 @@
 from simulator import Simulator 
 
 def main():
-    width = 8
-    height = 8
-    num_agents = 4
-    num_iterations = 5
+    width = 20
+    height = 20
+    num_agents = 50
+    num_iterations = 10
     
     simulator = Simulator(width, height)
     simulator.populate(num_agents)

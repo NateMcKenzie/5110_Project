@@ -12,7 +12,9 @@ class Simulator:
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
         for position in positions:
-            agent = Agent("cooperate", position)
+            random_num = random.random()
+            strategy = "cooperate" if random_num < 0.5 else "defect"
+            agent = Agent(strategy, position)
             self.agents.add(agent)
             self.empty.remove(position)
             self.grid[position[0]][position[1]] = agent
@@ -25,7 +27,6 @@ class Simulator:
                 attempted_moves[new_position].append(agent)
             else:
                 attempted_moves[new_position] = [agent]
-        print(attempted_moves)
         for position in attempted_moves:
             # Decide probabilities with game
             agents = attempted_moves[position]
@@ -33,13 +34,11 @@ class Simulator:
             
             # Roll probabilities to find who moves into the position
             choices = agents + [None]
-            choice = random.choices(choices, weights=probs)
-            print(choice)
+            choice = random.choices(choices, weights=probs)[0]
             
             # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
             for agent in agents:
                 if agent == choice:
-                    print("MOVE")
                     self.move(agent, position)
                 else:
                     self.reevaluate(agent)
@@ -56,7 +55,7 @@ class Simulator:
                     neighbors.append((x, y))
         return random.choice(neighbors)
         
-    def move(self, agent):
+    def move(self, agent, position):
         self.empty.add(agent.position)
         self.grid[agent.position[0]][agent.position[1]] = None
         
