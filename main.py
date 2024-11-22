@@ -30,6 +30,7 @@ def main():
         renderer.render(simulator)
 
     simulator.logger.save()
+    simulator.logger.plot()
 
 
 if __name__ == "__main__":
