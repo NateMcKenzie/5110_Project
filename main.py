@@ -24,9 +24,11 @@ def main():
     simulator.setCell(6, 6, CellState.KIND)
     renderer.render(simulator)
 
-    for i in range(50):
+    for i in range(20):
         simulator.update()
         renderer.render(simulator)
+
+    simulator.logger.save()
 
 
 if __name__ == '__main__':
