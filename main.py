@@ -4,12 +4,16 @@ from simulator import Simulator, CellState
 
 
 def main():
-    simulator = Simulator(10, 10, (0,0))
+    simulator = Simulator(20, 20, (0,0))
     renderer = FancyRenderer()
 
-    # Block: Should stay alive (in conway)
     simulator.setCell(1, 2, CellState.KIND)
     simulator.setCell(1, 3, CellState.KIND)
+    simulator.setCell(3, 4, CellState.KIND)
+    simulator.setCell(5, 5, CellState.KIND)
+    simulator.setCell(2, 7, CellState.KIND)
+    simulator.setCell(3, 4, CellState.KIND)
+    simulator.setCell(3, 6, CellState.KIND)
     simulator.setCell(2, 2, CellState.KIND)
     simulator.setCell(2, 3, CellState.KIND)
     simulator.setCell(3, 3, CellState.KIND)
