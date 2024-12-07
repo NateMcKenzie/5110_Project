@@ -1,8 +1,26 @@
-from renderer import Renderer
+import argparse
+
 from simulator import Simulator
+from basicRenderer import BasicRenderer
+from fancyRenderer import FancyRenderer
+from logger import Logger
 
 
-def main():
+def arg_setup():
+    parser = argparse.ArgumentParser(
+        prog="Evacuation Simulator",
+        description="Watch how kind or mean people are in evacuations",
+    )
+    parser.add_argument(
+        "output_dir",
+        default="output",
+        nargs="?",
+        help="Directory path where output files will be saved",
+    )
+    parser.add_argument("-f", "--fancy", action="store_true", help="Enable fancy renderer")
+    return parser.parse_args()
+
+def main(args):
     width = 20
     height = 20
     num_agents = 50
@@ -10,16 +28,21 @@ def main():
     
     simulator = Simulator(width, height)
     simulator.populate(num_agents)
-    renderer = Renderer()
+    simulator.count_states()
+    renderer = FancyRenderer() if args.fancy else BasicRenderer()
+    logger = Logger(args.output_dir)
     
-    print("Iteration 0")
     renderer.render(simulator)
-    
-    for it in range(num_iterations):
-        print(f"Iteration {it + 1}")
+
+    for i in range(num_iterations):
         simulator.update()
         renderer.render(simulator)
+        logger.logStep(simulator.coop_count, simulator.defect_count)
+
+    logger.save()
+    logger.plot()
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    args = arg_setup()
+    main(args)

@@ -8,6 +8,11 @@ class Simulator:
         self.agents = set()
         self.empty = set([(x, y) for x in range(self.width) for y in range(self.height)])
         self.attempted_moves = {} # new position: list of agents attempting to move into the position
+
+        # Stats and logging
+        self.coop_count = 0
+        self.defect_count = 0
+
         
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
@@ -42,6 +47,8 @@ class Simulator:
                     self.move(agent, position)
                 else:
                     self.reevaluate(agent)
+
+        self.count_states()
         
     # Choose a neighboring cell to attempt to move to
     # TODO: Implement smarter pathing logic
@@ -92,6 +99,18 @@ class Simulator:
             agent.strategy == "defect"
         else:
             agent.strategy = "cooperate"
+
+    def count_states(self):
+        self.coop_count = 0
+        self.defect_count = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.grid[x][y] in self.agents:
+                    agent = self.grid[x][y]
+                    if agent.strategy == "cooperate":
+                        self.coop_count += 1
+                    elif agent.strategy == "defect":
+                        self.defect_count += 1
             
 class Agent:
     def __init__(self, strategy, position):

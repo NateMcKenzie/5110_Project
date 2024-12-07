@@ -1,4 +1,4 @@
-class Renderer:
+class BasicRenderer:
     def render(self, simulator):
         for y in range(simulator.height):
             line = ""
