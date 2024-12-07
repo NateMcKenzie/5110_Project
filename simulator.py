@@ -1,56 +1,102 @@
-from copy import deepcopy
-from enum import Enum
-import math
-
-
-class CellState(Enum):
-    DEAD = 0
-    KIND = 1
-    MEAN = 2
-
+import random
 
 class Simulator:
-    def __init__(self, width: int, height: int, exit: (int,int)):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.__exit = exit
+        self.grid = [[None for y in range(height)] for x in range(width)]
+        self.agents = set()
+        self.empty = set([(x, y) for x in range(self.width) for y in range(self.height)])
+        self.attempted_moves = {} # new position: list of agents attempting to move into the position
         
-        self.__board = [[CellState.DEAD for x in range(width)] for y in range(height)]
-        self.__distances = []
-        for x in range(width):
-            self.__distances.append([])
-            for y in range(height):
-                distance = math.sqrt((exit[0] - x)**2 + (exit[1] - y)**2)
-                self.__distances[-1].append(distance)
-
+    def populate(self, num_agents):
+        positions = random.sample(list(self.empty), num_agents)
+        for position in positions:
+            random_num = random.random()
+            strategy = "cooperate" if random_num < 0.5 else "defect"
+            agent = Agent(strategy, position)
+            self.agents.add(agent)
+            self.empty.remove(position)
+            self.grid[position[0]][position[1]] = agent
+    
     def update(self):
-        pass
-        # Go through each cell
-            # If there is a person there (KIND or MEAN)
-                # Assign probabilities to cells around them according to distance to exit
-                # TODO: Should probably pre-calculate and store these distances in the board itself
-                # Randomly pick one to go to
-                # Somehow indicate that this cell has +1 KIND/MEAN trying to enter it
-        # Go through cells again
-            # Determine who is trying to come into cell
-                # If no one: change nothing.
-                # If one person: They come in.
-                # If multiple KIND people: They have equal chance of moving in.
-                # If 1 MEAN and some KIND: MEAN goes in.
-                # If multiple MEAN: They have probability of moving in.
-            # Mark cell coming from as DEAD, mark cell moving to according to winner.
-            # Those who don't win have to re-evaluate if they should be MEAN or KIND
-
-    def setCell(self, x: int, y: int, state: CellState):
-        if (0 <= x < self.width) and (0 <= y < self.height):
-            self.__board[y][x] = state
-
-    def getCell(self, x: int, y: int):
-        if (0 <= x < self.width) and (0 <= y < self.height):
-            return self.__board[y][x]
-        return CellState.DEAD
-
-    def getDistance(self, x: int, y: int):
-        if (0 <= x < self.width) and (0 <= y < self.height):
-            return self.__distances[y][x]
-        return float('inf')
+        attempted_moves = {} # position: list[Agent]
+        for agent in self.agents:
+            new_position = self.choose_move(agent)
+            if new_position in attempted_moves:
+                attempted_moves[new_position].append(agent)
+            else:
+                attempted_moves[new_position] = [agent]
+        for position in attempted_moves:
+            # Decide probabilities with game
+            agents = attempted_moves[position]
+            probs = self.game(agents)
+            
+            # Roll probabilities to find who moves into the position
+            choices = agents + [None]
+            choice = random.choices(choices, weights=probs)[0]
+            
+            # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
+            for agent in agents:
+                if agent == choice:
+                    self.move(agent, position)
+                else:
+                    self.reevaluate(agent)
+        
+    # Choose a neighboring cell to attempt to move to
+    # TODO: Implement smarter pathing logic
+    def choose_move(self, agent):
+        neighbors = []
+        for dx in range(-1, 2):
+            x = agent.position[0] + dx
+            for dy in range(-1, 2):
+                y = agent.position[1] + dy
+                if (x, y) in self.empty and 0 <= x < self.width and 0 <= y < self.height and not (dx == dy == 0):
+                    neighbors.append((x, y))
+        return random.choice(neighbors)
+        
+    def move(self, agent, position):
+        self.empty.add(agent.position)
+        self.grid[agent.position[0]][agent.position[1]] = None
+        
+        agent.position = position
+        self.empty.remove(agent.position)
+        self.grid[position[0]][position[1]] = agent
+            
+    # Return a list of probabilities of moving for each agent.
+    # The last probability is the probability of no one moving.
+    def game(self, agents):
+        P = 2.5
+        num_cooperate = 0
+        num_defect = 0
+        for agent in agents:
+            if agent.strategy == "cooperate":
+                num_cooperate += 1
+            elif agent.strategy == "defect":
+                num_defect += 1
+        if num_defect == 0:
+            probs = [1.0 / num_cooperate for agent in agents]
+        elif num_defect == 1:
+            probs = [0.0 if agent.strategy == "cooperate" else 1.0 for agent in agents]
+        else:
+            probs = [1.0 / num_defect ** P]
+        probs.append(1.0 - sum(probs)) # Probability that no one moves
+        return probs
+            
+    def reevaluate(self, agent):
+        # Calculate formula for reevaluating strategy
+        random_num = random.random()
+        if random_num < 0.2: # Only change with 20% probability TODO: use actual formula
+            return
+        if agent.strategy == "cooperate":
+            agent.strategy == "defect"
+        else:
+            agent.strategy = "cooperate"
+            
+class Agent:
+    def __init__(self, strategy, position):
+        self.strategy = strategy
+        self.position = position
+        
+    def __repr__(self):
+        return f"Agent {self.strategy} {self.position}"

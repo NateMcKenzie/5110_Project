@@ -1,16 +1,14 @@
-from simulator import Simulator, CellState
-
-
 class Renderer:
-    def render(self, simulator: Simulator):
-        character = ""
-        for row in range(simulator.height):
-            for col in range(simulator.width):
-                match (simulator.getCell(col, row)):
-                    case CellState.KIND:
-                        print("+", end="")
-                    case CellState.MEAN:
-                        print("-", end="")
-                    case _:
-                        print(" ", end="")
-            print()
+    def render(self, simulator):
+        for y in range(simulator.height):
+            line = ""
+            for x in range(simulator.width):
+                if simulator.grid[x][y] in simulator.agents:
+                    agent = simulator.grid[x][y]
+                    if agent.strategy == "cooperate":
+                        line += "+"
+                    elif agent.strategy == "defect":
+                        line += "-"
+                else:
+                    line += "."
+            print(line)

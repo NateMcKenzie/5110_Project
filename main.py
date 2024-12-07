@@ -1,26 +1,23 @@
 from renderer import Renderer
-from simulator import Simulator, CellState
+from simulator import Simulator
 
 
 def main():
-    simulator = Simulator(10, 10, (0,0))
+    width = 20
+    height = 20
+    num_agents = 50
+    num_iterations = 10
+    
+    simulator = Simulator(width, height)
+    simulator.populate(num_agents)
     renderer = Renderer()
-
-    # Block: Should stay alive (in conway)
-    simulator.setCell(1, 2, CellState.KIND)
-    simulator.setCell(1, 3, CellState.KIND)
-    simulator.setCell(2, 2, CellState.KIND)
-    simulator.setCell(2, 3, CellState.KIND)
-
-    # Blinker: Should blink (in conway)
-    simulator.setCell(6, 4, CellState.KIND)
-    simulator.setCell(6, 5, CellState.KIND)
-    simulator.setCell(6, 6, CellState.KIND)
+    
+    print("Iteration 0")
     renderer.render(simulator)
-
-    for i in range(50):
+    
+    for it in range(num_iterations):
+        print(f"Iteration {it + 1}")
         simulator.update()
-        print("============")
         renderer.render(simulator)
 
 
