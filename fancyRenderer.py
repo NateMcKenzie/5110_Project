@@ -23,6 +23,10 @@ class FancyRenderer:
                         char = "+"
                     elif agent.strategy == "defect":
                         char = "-"
+                elif (x, y) in simulator.obstacles:
+                    char = "="
+                elif (x, y) in simulator.exits:
+                    char = "/"
                 window.addch(y, x, char)
         self.show_stats(window, y, simulator.coop_count, simulator.defect_count)
         curses.napms(900)

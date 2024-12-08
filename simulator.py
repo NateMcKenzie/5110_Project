@@ -1,12 +1,14 @@
 import random
 
 class Simulator:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.grid = [[None for y in range(height)] for x in range(width)]
+    def __init__(self, level_data):
+        self.width = level_data.width
+        self.height = level_data.height
+        self.grid = [[None for y in range(self.height)] for x in range(self.width)]
         self.agents = set()
-        self.empty = set([(x, y) for x in range(self.width) for y in range(self.height)])
+        self.empty = set([(x, y) for x in range(self.width) for y in range(self.height) if (x, y) not in level_data.obstacles])
+        self.obstacles = set(level_data.obstacles)
+        self.exits = set(level_data.exits)
         self.attempted_moves = {} # new position: list of agents attempting to move into the position
 
         # Stats and logging

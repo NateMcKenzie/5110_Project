@@ -9,6 +9,10 @@ class BasicRenderer:
                         line += "+"
                     elif agent.strategy == "defect":
                         line += "-"
+                elif (x, y) in simulator.obstacles:
+                    line += "="
+                elif (x, y) in simulator.exits:
+                    line += "/"
                 else:
                     line += "."
             print(line)
