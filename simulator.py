@@ -38,9 +38,13 @@ class Simulator:
             probs = self.game(agents)
             
             # Roll probabilities to find who moves into the position
-            choices = agents + [None]
+            choices = agents.copy()
+            if len(probs) > len(agents):
+                # There is a probability of no one moving
+                choices.append(None)
+
             choice = random.choices(choices, weights=probs)[0]
-            
+
             # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
             for agent in agents:
                 if agent == choice:
@@ -86,8 +90,8 @@ class Simulator:
         elif num_defect == 1:
             probs = [0.0 if agent.strategy == "cooperate" else 1.0 for agent in agents]
         else:
-            probs = [1.0 / num_defect ** P]
-        probs.append(1.0 - sum(probs)) # Probability that no one moves
+            probs = [1.0 / num_defect ** P for agent in agents]
+            probs.append(1.0 - sum(probs)) # Probability that no one moves
         return probs
             
     def reevaluate(self, agent):
@@ -96,22 +100,19 @@ class Simulator:
         if random_num < 0.2: # Only change with 20% probability TODO: use actual formula
             return
         if agent.strategy == "cooperate":
-            agent.strategy == "defect"
+            agent.strategy = "defect"
         else:
             agent.strategy = "cooperate"
 
     def count_states(self):
         self.coop_count = 0
         self.defect_count = 0
-        for y in range(self.height):
-            for x in range(self.width):
-                if self.grid[x][y] in self.agents:
-                    agent = self.grid[x][y]
-                    if agent.strategy == "cooperate":
-                        self.coop_count += 1
-                    elif agent.strategy == "defect":
-                        self.defect_count += 1
-            
+        for agent in self.agents:
+            if agent.strategy == "cooperate":
+                self.coop_count += 1
+            elif agent.strategy == "defect":
+                self.defect_count += 1
+
 class Agent:
     def __init__(self, strategy, position):
         self.strategy = strategy
