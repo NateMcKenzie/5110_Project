@@ -23,8 +23,8 @@ def arg_setup():
 def main(args):
     width = 20
     height = 20
-    num_agents = 50
-    num_iterations = 10
+    num_agents = 5
+    num_iterations = 2
     
     simulator = Simulator(width, height)
     simulator.populate(num_agents)
@@ -34,8 +34,9 @@ def main(args):
     
     renderer.render(simulator)
 
-    for i in range(num_iterations):
+    for i in range(1, num_iterations + 1):
         simulator.update()
+        print(f"Update {i}")
         renderer.render(simulator)
         logger.logStep(simulator.coop_count, simulator.defect_count)
 

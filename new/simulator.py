@@ -79,7 +79,7 @@ class Simulator:
         elif num_defect == 1:
             probs = [0.0 if agent.strategy == "cooperate" else 1.0 for agent in agents]
         else:
-            probs = [1.0 / num_defect ** P]
+            probs = [1.0 / num_defect ** P for agent in agents]
         probs.append(1.0 - sum(probs)) # Probability that no one moves
         return probs
             

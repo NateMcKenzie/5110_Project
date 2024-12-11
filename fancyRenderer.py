@@ -17,8 +17,8 @@ class FancyRenderer:
         for y in range(simulator.height):
             for x in range(simulator.width):
                 char = " "
-                if simulator.grid[x][y] in simulator.agents:
-                    agent = simulator.grid[x][y]
+                if (x, y) in simulator.agents:
+                    agent = simulator.agents[(x, y)]
                     if agent.strategy == "cooperate":
                         char = "+"
                     elif agent.strategy == "defect":
