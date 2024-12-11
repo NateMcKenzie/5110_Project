@@ -1,5 +1,6 @@
 class BasicRenderer:
-    def render(self, simulator):
+    def render(self, simulator, round_count):
+        print(f"Update {round_count}")
         for y in range(simulator.height):
             line = ""
             for x in range(simulator.width):
@@ -11,6 +12,8 @@ class BasicRenderer:
                         line += "-"
                 elif (x, y) in simulator.obstacles:
                     line += "o"
+                elif (x, y) in simulator.exits:
+                    line += "/"
                 else:
                     line += "."
             print(line)

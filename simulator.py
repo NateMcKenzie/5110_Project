@@ -2,42 +2,33 @@ import random
 import itertools as it
 
 class Simulator:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        
+    def __init__(self, level_data):
         self.P = 25
-        
+        self.width = level_data.width
+        self.height = level_data.height
         self.agents = {}
-        self.empty = set() # All cells that are accessible but currently unoccupied
         self.neighboring = dict() # position: neighboring accessible cells (8 cells; accounting for walls and obstacles; may be out of bounds (for escaping))
-        self.obstacles = set()
-        self.exits = set() # position, direction
-        self.walls = set() # (position, direction)
+        self.empty = set([(x, y) for x in range(self.width) for y in range(self.height) if (x, y) not in level_data.obstacles])
+        self.obstacles = set(level_data.obstacles)
+        self.exits = set(level_data.exits)
         self.evacuated = set() # All evacuated agents
-        
-        for (x, y) in it.product(range(width), range(height)):
-            self.empty.add((x, y))
+        self.attempted_moves = {}
+
+
+        for (x, y) in it.product(range(self.width), range(self.height)):
             self.compute_neighboring((x, y))
-            
-        # Add walls around the perimeter
-        for x in range(width):
-            self.add_wall((x, 0), "up")
-            self.add_wall((x, height - 1), "down")
-        for y in range(height):
-            self.add_wall((0, y), "left")
-            self.add_wall((width - 1, y), "right")
 
         # Stats and logging
         self.coop_count = 0
         self.defect_count = 0
+
         
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
         for position in positions:
             strategy = "cooperate" if random.random() < 0.5 else "defect" # TODO: change this
             self.add_agent(strategy, position)
-            
+    
     def add_agent(self, strategy, position):
         if position in self.empty:
             agent = Agent(strategy, position)
@@ -47,109 +38,23 @@ class Simulator:
             print(f"Cannot create agent at out-of-bounds position {position}")
         else:
             print(f"Cannot create agent at nonempty position {position}")
-            
-    def add_obstacle(self, position):
-        if position in self.empty:
-            empty.remove(position)
-            obstacles.add(position)
-        elif not self.is_in_bounds(position):
-            print(f"Cannot create agent at out-of-bounds position {position}")
-        else:
-            print(f"Cannot add obstacle at nonempty position {position}")
-            
-    def add_wall(self, position, direction):
-        if not self.is_in_bounds(position):
-            print("Cannot create wall at out-of-bounds position {position}")
-            return
-            
-        # Check direction and compute position of other side of wall
-        x, y = position
-        if direction == "up":
-            other_position = (x, y - 1)
-            other_direction = "down"
-        elif direction == "left":
-            other_position = (x - 1, y)
-            other_direction = "right"
-        elif direction == "right":
-            other_position = (x + 1, y)
-            other_direction = "left"
-        elif direction == "down":
-            other_position = (x, y + 1)
-            other_direction = "up"
-        else:
-            print(f"Cannot create wall in invalid direction {direction}")
-            return
-            
-        # Add wall at direction
-        self.walls.add((position, direction))
-        self.compute_neighboring(position)
-        
-        # If other side is in bounds, add wall on opposite side
-        if self.is_in_bounds(other_position):
-            self.walls.add((other_position, other_direction))
-            self.compute_neighboring(other_position)
-        
-    def remove_wall(self, position, direction):
-        if not self.is_in_bounds(position):
-            print("Cannot remove wall at out-of-bounds position {position}")
-            return
-            
-        # Check direction and compute position of other side of wall
-        x, y = position
-        if direction == "up":
-            other_position = (x, y - 1)
-            other_direction = "down"
-        elif direction == "left":
-            other_position = (x - 1, y)
-            other_direction = "right"
-        elif direction == "right":
-            other_position = (x + 1, y)
-            other_direction = "left"
-        elif direction == "down":
-            other_position = (x, y + 1)
-            other_direction = "up"
-        else:
-            print(f"Cannot create wall in invalid direction {direction}")
-            return
-            
-        # Remove wall at direction
-        self.walls.remove((position, direction))
-        self.compute_neighboring(position)
-        
-        # If other side is in bounds, remove wall on opposite side
-        if self.is_in_bounds(other_position):
-            self.walls.remove((other_position, other_direction))
-            self.compute_neighboring(other_position)
-        
-    # Compute all accessible cells within the Moore neighborhood
+
     def compute_neighboring(self, position):
         if not self.is_in_bounds(position):
             return
         x, y = position
-        neighbors = []
-        
-        if (position, "left") not in self.walls:
-            neighbors.append((x - 1, y))
-            if (position, "up") not in self.walls:
-                neighbors.append((x - 1, y - 1))
-            if (position, "down") not in self.walls:
-                neighbors.append((x - 1, y + 1))
-        if (position, "right") not in self.walls:
-            neighbors.append((x + 1, y))
-            if (position, "up") not in self.walls:
-                neighbors.append((x + 1, y - 1))
-            if (position, "down") not in self.walls:
-                neighbors.append((x + 1, y + 1))
-        if (position, "up") not in self.walls:
-            neighbors.append((x, y - 1))
-        if (position, "down") not in self.walls:
-            neighbors.append((x, y + 1))
-            
-        self.neighboring[position] = neighbors
-        
+        neighbors = [(new_x, new_y) for new_x in range(x - 1, x + 2) for new_y in range (y - 1, y + 2)]
+        valid_neighbors = []
+
+        for neighbor in neighbors:
+            if neighbor not in self.obstacles and self.is_in_bounds(neighbor):
+                valid_neighbors.append(neighbor)
+
+        self.neighboring[position] = valid_neighbors
+
     def is_in_bounds(self, position):
         return 0 <= position[0] < self.width and 0 <= position[1] < self.height
-    
+
     def update(self):
         attempted_moves = {} # position: list[Agent]
         for position, agent in self.agents.items(): # Each agent will try to move
@@ -171,10 +76,10 @@ class Simulator:
                 if agent == moving_agent:
                     if self.is_in_bounds(position):
                         self.move(agent, position)
-                        print(f"{agent} moves")
+                       #print(f"{agent} moves")
                     else:
                         self.evacuate_agent(agent)
-                        print(f"{agent} evacuates")
+                       #print(f"{agent} evacuates")
                 else:
                     self.reevaluate(agent)
 
@@ -194,10 +99,11 @@ class Simulator:
     def move(self, agent, position):
         self.empty.add(agent.position)
         self.empty.remove(position)
+
         del self.agents[agent.position]
         self.agents[position] = agent
         agent.position = position
-        
+
     def evacuate_agent(self, agent):
         self.evacuated.add(agent)
         self.agents.remove(agent)
@@ -207,7 +113,7 @@ class Simulator:
     def game(self, agents):
         if len(agents) == 1:
             return agents[0]
-    
+
         num_cooperate = 0
         num_defect = 0
         for agent in agents:
