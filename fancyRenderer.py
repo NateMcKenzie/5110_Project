@@ -9,7 +9,7 @@ class FancyRenderer:
         curses.initscr()
         curses.curs_set(0)  # 0=invisible
 
-    def render(self, simulator: Simulator):
+    def render(self, simulator: Simulator, _):
         curses.wrapper(self.wrapped_render, simulator)
 
     def wrapped_render(self, window, simulator: Simulator):
@@ -23,6 +23,10 @@ class FancyRenderer:
                         char = "+"
                     elif agent.strategy == "defect":
                         char = "-"
+                elif (x, y) in simulator.obstacles:
+                    char = "o"
+                elif (x, y) in simulator.exits:
+                    char = "/"
                 window.addch(y, x, char)
         self.show_stats(window, y, simulator.coop_count, simulator.defect_count)
         curses.napms(900)
