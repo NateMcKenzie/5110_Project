@@ -30,7 +30,7 @@ def arg_setup():
 def main(args):
     width = 20
     height = 20
-    num_agents = 50
+    num_agents = 1
     num_iterations = 50
     
     level_data = LevelData(args.level_file)
@@ -40,11 +40,11 @@ def main(args):
     renderer = FancyRenderer() if args.fancy else BasicRenderer()
     logger = Logger(args.output_dir)
     
-    renderer.render(simulator)
+    renderer.render(simulator, 0)
 
     for i in range(num_iterations):
         simulator.update()
-        renderer.render(simulator)
+        renderer.render(simulator, i)
         logger.logStep(simulator.coop_count, simulator.defect_count)
 
     logger.save()

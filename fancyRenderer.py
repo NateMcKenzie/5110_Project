@@ -9,7 +9,7 @@ class FancyRenderer:
         curses.initscr()
         curses.curs_set(0)  # 0=invisible
 
-    def render(self, simulator: Simulator):
+    def render(self, simulator: Simulator, _):
         curses.wrapper(self.wrapped_render, simulator)
 
     def wrapped_render(self, window, simulator: Simulator):
@@ -17,14 +17,14 @@ class FancyRenderer:
         for y in range(simulator.height):
             for x in range(simulator.width):
                 char = " "
-                if simulator.grid[x][y] in simulator.agents:
-                    agent = simulator.grid[x][y]
+                if (x, y) in simulator.agents:
+                    agent = simulator.agents[(x, y)]
                     if agent.strategy == "cooperate":
                         char = "+"
                     elif agent.strategy == "defect":
                         char = "-"
                 elif (x, y) in simulator.obstacles:
-                    char = "="
+                    char = "o"
                 elif (x, y) in simulator.exits:
                     char = "/"
                 window.addch(y, x, char)
