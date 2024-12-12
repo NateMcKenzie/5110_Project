@@ -5,6 +5,7 @@ import itertools as it
 class Simulator:
     def __init__(self, level_data):
         self.P = 25
+        self.coop_rate = level_data.coop_rate
         self.width = level_data.width
         self.height = level_data.height
         self.agents = {}
@@ -33,7 +34,7 @@ class Simulator:
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
         for position in positions:
-            strategy = "cooperate" if random.random() < 0.5 else "defect" # TODO: change this
+            strategy = "cooperate" if random.random() < self.coop_rate else "defect" 
             self.add_agent(strategy, position)
     
     def add_agent(self, strategy, position):

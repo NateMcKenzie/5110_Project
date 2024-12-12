@@ -3,8 +3,10 @@ class LevelData:
         with open(filename) as file:
             self.obstacles = []
             self.exits = []
+            file.readline() # Ignore header
             self.width, self.height = map(int, file.readline().split(" "))
             self.num_agents, self.num_iterations = map(int, file.readline().split(" "))
+            self.coop_rate = float(file.readline())
 
             for y in range(self.height):
                 line = file.readline()

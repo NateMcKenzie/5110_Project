@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import os
+import math
 from pathlib import Path
 
 
@@ -8,6 +9,7 @@ class Logger:
         self.__log_path = Path(log_path)
         self.__coop_history = []
         self.__defect_history = []
+        self.__total_history = []
         self.__evac_history = []
 
         if not os.path.exists(log_path):
@@ -16,6 +18,7 @@ class Logger:
     def logStep(self, coop, defect, evac):
         self.__coop_history.append(coop)
         self.__defect_history.append(defect)
+        self.__total_history.append(defect + coop)
         self.__evac_history.append(evac)
 
     def save(self):
@@ -28,45 +31,96 @@ class Logger:
 
     def plot(self):
         """
-        Courtesy of Claude
+        Modified from Claude
 
-        Creates two plots:
-        1. Line plot showing coop and defect values over time
-        2. Scatter plot showing the relationship between coop and defect values
+        Creates multiple plots to visualize simulation data:
         """
+        print("Plotting may take time")
+        # Ensure the log directory exists
+        self.__log_path.mkdir(parents=True, exist_ok=True)
 
-        # Create figure with two subplots side by side
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-
-        # Plot 1: Time series
+        # Plot 0: Time series
+        plt.figure(figsize=(20,10))
         steps = range(len(self.__coop_history))
-        ax1.plot(steps, self.__coop_history, "b-", label="Kind")
-        ax1.plot(steps, self.__defect_history, "r-", label="Mean")
-        ax1.set_xlabel("Step")
-        ax1.set_ylabel("Value")
-        ax1.set_title("Kind vs Mean")
-        ax1.legend()
-        ax1.grid(True)
+        small_steps = range(0, len(self.__coop_history), math.ceil(len(self.__coop_history)/50))
+        plt.plot(steps, self.__coop_history, "b-", label="Cooperate")
+        plt.plot(steps, self.__defect_history, "r-", label="Defect")
+        plt.xlabel("Step")
+        plt.ylabel("Value")
+        plt.title("Cooperation vs Defection")
+        plt.legend()
+        plt.grid(True)
         # Set integer ticks for x-axis
-        ax1.set_xticks(steps)
-        ax1.set_xticklabels([str(i) for i in steps])
+        plt.xticks(small_steps, [str(i) for i in small_steps])
+        plt.savefig(self.__log_path.joinpath("coop_vs_defect.png"))
+        plt.close()
 
-        # Plot 2: Relationship between Kind and Mean
-        ax2.scatter(self.__coop_history, self.__defect_history, alpha=0.5)
-        ax2.set_xlabel("Kind")
-        ax2.set_ylabel("Mean")
-        ax2.set_title("Kind vs Mean Scatter")
-        ax2.grid(True)
+        # Plot 1: With total
+        plt.figure(figsize=(20,10))
+        steps = range(len(self.__coop_history))
+        small_steps = range(0, len(self.__coop_history), math.ceil(len(self.__coop_history)/50))
+        plt.plot(steps, [self.__coop_history[i]/self.__total_history[i] for i in range(len(self.__total_history)-1)] + [0], "b-", label="Cooperate")
+        plt.plot(steps, [self.__defect_history[i]/self.__total_history[i] for i in range(len(self.__total_history)-1)] + [0], "r-", label="Defect")
+        plt.xlabel("Step")
+        plt.ylabel("Value")
+        plt.title("Coop vs Defection as Percentage")
+        plt.legend()
+        plt.grid(True)
+        # Set integer ticks for x-axis
+        plt.xticks(small_steps, [str(i) for i in small_steps])
+        plt.savefig(self.__log_path.joinpath("coop_vs_defect_percentage.png"))
+        plt.close()
 
-        # Add step numbers as annotations to scatter plot
-        for i, (x, y) in enumerate(zip(self.__coop_history, self.__defect_history)):
-            ax2.annotate(
-                i, (x, y), xytext=(5, 5), textcoords="offset points", fontsize=8
-            )
-
-        # Adjust layout and display
+        # Plot 2: Balance
+        plt.figure(figsize=(20,10))
+        steps = range(len(self.__coop_history))
+        small_steps = range(0, len(self.__coop_history), math.ceil(len(self.__coop_history)/50))
+        plt.plot(steps, [self.__coop_history[i] - self.__defect_history[i] for i in range(len(self.__coop_history))], "p-", label="Cooperate Advantage")
+        plt.xlabel("Step")
+        plt.ylabel("Value")
+        plt.title("Coop Advantage Over Time")
+        plt.legend()
+        plt.grid(True)
+        # Set integer ticks for x-axis
+        plt.xticks(small_steps, [str(i) for i in small_steps])
+        plt.savefig(self.__log_path.joinpath("coop_advantage.png"))
+        plt.close()
+        
+        # Plot 3: Cooperation Time Series
+        plt.figure(figsize=(20,10))
+        plt.plot(steps, self.__coop_history, "b-", label="Cooperation")
+        plt.xlabel("Step")
+        plt.ylabel("Coopeartion Value")
+        plt.title("Cooperation Over Time")
+        plt.legend()
+        plt.grid(True)
+        plt.xticks(small_steps, [str(i) for i in small_steps])
         plt.tight_layout()
-
-        # Save the plots
-        plt.savefig(self.__log_path.joinpath("plots.png"))
+        plt.savefig(self.__log_path.joinpath("coop_timeseries.png"))
+        plt.close()
+        
+        # Plot 4: Evacuation Time Series
+        plt.figure(figsize=(20,10))
+        plt.plot(steps, self.__evac_history, "g-", label="Evacuation")
+        plt.xlabel("Step")
+        plt.ylabel("Total Evacuated")
+        plt.title("Evacuation Progress")
+        plt.legend()
+        plt.grid(True)
+        plt.xticks(small_steps, [str(i) for i in small_steps])
+        plt.tight_layout()
+        plt.savefig(self.__log_path.joinpath("evacuation.png"))
+        plt.close()
+        
+        # Plot 4: Defection Time Series
+        plt.figure(figsize=(20,10))
+        plt.plot(steps, self.__defect_history, "r-", label="Defection")
+        plt.xlabel("Step")
+        plt.ylabel("Defection Value")
+        plt.title("Defection Over Time")
+        plt.legend()
+        plt.grid(True)
+        plt.xticks(small_steps, [str(i) for i in small_steps])
+        plt.tight_layout()
+        plt.savefig(self.__log_path.joinpath("defection_timeseries.png"))
         plt.close()
