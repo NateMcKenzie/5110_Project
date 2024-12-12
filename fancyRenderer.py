@@ -34,7 +34,7 @@ class FancyRenderer:
         if simulator.over:
             window.addstr(simulator.height + 1, 0, f"ALL AGENTS EXITED IN {round_count} steps")
             window.refresh()
-            curses.napms(8000)
+            curses.napms(4000)
             return
 
         self.show_stats(window, y, simulator.coop_count, simulator.defect_count, len(simulator.evacuated))

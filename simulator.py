@@ -28,6 +28,8 @@ class Simulator:
 
 
     def calc_exit_distance(self, x, y):
+        if (x, y) in self.obstacles:
+            return float("inf")
         distances = [math.sqrt((exit_pos[0]-x)**2 + (exit_pos[1]-y)**2) for exit_pos in self.exits]
         return min(distances)
         
@@ -97,13 +99,13 @@ class Simulator:
     # TODO: Implement smarter pathing logic
     def choose_move(self, agent):
         available_moves = [cell for cell in self.neighboring[agent.position] if cell in self.empty]
+        if len(available_moves) == 0:
+            return None
         exit_moves = [cell for cell in available_moves if cell in self.exits]
         if len(exit_moves) > 0: # Move to exit if available
             return random.choice(exit_moves)
-        elif len(available_moves) == 0:
-            return None
-        ranking = sorted(available_moves, key=lambda move: self.exit_distances[move[0]][move[1]], reverse=True)
-        weight = [ranking.index(move) + 1 for move in available_moves]
+        ranking = sorted(available_moves, key=lambda move: self.exit_distances[move[1]][move[0]], reverse=True)
+        weight = [(ranking.index(move) + 1)**1.2 for move in available_moves]
         choice = random.choices(available_moves, weights=weight)
         return choice[0]
         
