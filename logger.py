@@ -8,13 +8,15 @@ class Logger:
         self.__log_path = Path(log_path)
         self.__coop_history = []
         self.__defect_history = []
+        self.__evac_history = []
 
         if not os.path.exists(log_path):
             os.makedirs(log_path)
 
-    def logStep(self, coop, defect):
+    def logStep(self, coop, defect, evac):
         self.__coop_history.append(coop)
         self.__defect_history.append(defect)
+        self.__evac_history.append(evac)
 
     def save(self):
         with open(self.__log_path.joinpath("log.txt"), "w") as log:
@@ -22,6 +24,7 @@ class Logger:
                 print(f"===== Step {i} =====", file=log)
                 print(f"Kind: {self.__coop_history[i]}", file=log)
                 print(f"Mean: {self.__defect_history[i]}", file=log)
+                print(f"Evacuated: {self.__evac_history[i]}", file=log)
 
     def plot(self):
         """

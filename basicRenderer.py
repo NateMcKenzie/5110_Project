@@ -1,6 +1,8 @@
 class BasicRenderer:
     def render(self, simulator, round_count):
         print(f"Update {round_count}")
+        if simulator.over:
+            print(f"All agents exited in {round_count} steps")
         for y in range(simulator.height):
             line = ""
             for x in range(simulator.width):

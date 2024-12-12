@@ -28,7 +28,7 @@ def arg_setup():
     return parser.parse_args()
 
 def main(args):
-    num_agents = 5
+    num_agents = 50
     num_iterations = 50
     
     level_data = LevelData(args.level_file)
@@ -40,10 +40,13 @@ def main(args):
     
     renderer.render(simulator, 0)
 
-    for i in range(num_iterations):
+    for i in range(1, num_iterations + 1):
         simulator.update()
         renderer.render(simulator, i)
-        logger.logStep(simulator.coop_count, simulator.defect_count)
+        logger.logStep(simulator.coop_count, simulator.defect_count, len(simulator.evacuated))
+        if simulator.over:
+            break
+
 
     logger.save()
     logger.plot()

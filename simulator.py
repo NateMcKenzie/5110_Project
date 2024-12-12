@@ -1,4 +1,5 @@
 import random
+import math
 import itertools as it
 
 class Simulator:
@@ -11,8 +12,9 @@ class Simulator:
         self.empty = set([(x, y) for x in range(self.width) for y in range(self.height) if (x, y) not in level_data.obstacles])
         self.obstacles = set(level_data.obstacles)
         self.exits = set(level_data.exits)
+        self.exit_distances = [[self.calc_exit_distance(x, y) for x in range(self.width)] for y in range(self.height)]
         self.evacuated = set() # All evacuated agents
-        self.attempted_moves = {}
+        self.over = False
 
 
         for (x, y) in it.product(range(self.width), range(self.height)):
@@ -22,6 +24,10 @@ class Simulator:
         self.coop_count = 0
         self.defect_count = 0
 
+
+    def calc_exit_distance(self, x, y):
+        distances = [math.sqrt((exit_pos[0]-x)**2 + (exit_pos[1]-y)**2) for exit_pos in self.exits]
+        return min(distances)
         
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
@@ -74,7 +80,7 @@ class Simulator:
             # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
             for agent in agents:
                 if agent == moving_agent:
-                    if self.is_in_bounds(position):
+                    if position not in self.exits:
                         self.move(agent, position)
                        #print(f"{agent} moves")
                     else:
@@ -94,7 +100,10 @@ class Simulator:
             return random.choice(exit_moves)
         elif len(available_moves) == 0:
             return None
-        return random.choice(available_moves)
+        ranking = sorted(available_moves, key=lambda move: self.exit_distances[move[0]][move[1]], reverse=True)
+        weight = [ranking.index(move) + 1 for move in available_moves]
+        choice = random.choices(available_moves, weights=weight)
+        return choice[0]
         
     def move(self, agent, position):
         self.empty.add(agent.position)
@@ -106,7 +115,9 @@ class Simulator:
 
     def evacuate_agent(self, agent):
         self.evacuated.add(agent)
-        self.agents.remove(agent)
+        del self.agents[agent.position]
+        if len(self.agents) == 0:
+            self.over = True
             
     # Returns the agent that moves into the square
     # Returns None if no agent moves
