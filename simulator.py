@@ -115,6 +115,7 @@ class Simulator:
 
     def evacuate_agent(self, agent):
         self.evacuated.add(agent)
+        self.empty.add(agent.position)
         del self.agents[agent.position]
         if len(self.agents) == 0:
             self.over = True
