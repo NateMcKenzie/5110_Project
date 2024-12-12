@@ -20,9 +20,10 @@ class Simulator:
         for (x, y) in it.product(range(self.width), range(self.height)):
             self.compute_neighboring((x, y))
 
+        self.populate(level_data.num_agents)
+
         # Stats and logging
-        self.coop_count = 0
-        self.defect_count = 0
+        self.count_states()
 
 
     def calc_exit_distance(self, x, y):

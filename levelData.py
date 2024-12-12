@@ -4,6 +4,7 @@ class LevelData:
             self.obstacles = []
             self.exits = []
             self.width, self.height = map(int, file.readline().split(" "))
+            self.num_agents, self.num_iterations = map(int, file.readline().split(" "))
 
             for y in range(self.height):
                 line = file.readline()
