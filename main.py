@@ -1,6 +1,7 @@
 import argparse
 
 from simulator import Simulator
+from quietRenderer import QuietRenderer
 from basicRenderer import BasicRenderer
 from fancyRenderer import FancyRenderer
 from logger import Logger
@@ -25,12 +26,18 @@ def arg_setup():
         help="Directory path where output files will be saved",
     )
     parser.add_argument("-f", "--fancy", action="store_true", help="Enable fancy renderer")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Disable rendering")
     return parser.parse_args()
 
 def main(args):
     level_data = LevelData(args.level_file)
     simulator = Simulator(level_data)
-    renderer = FancyRenderer() if args.fancy else BasicRenderer()
+    if args.quiet:
+        renderer = QuietRenderer()
+    elif args.fancy:
+        renderer = FancyRenderer(simulator.width, simulator.height)
+    else:
+        renderer = BasicRenderer()
     logger = Logger(args.output_dir)
     
     renderer.render(simulator, 0)

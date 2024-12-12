@@ -7,8 +7,12 @@ import time
 class FancyRenderer:
     BAR_WIDTH = 50
 
-    def __init__(self):
+    def __init__(self, width, height):
         curses.initscr()
+        if curses.LINES < height + 6:
+            curses.endwin()
+            raise RuntimeError(f"Your terminal only has {curses.LINES} lines. Fancy rendering this file requires {height + 6}")
+        curses.cbreak()
         curses.curs_set(0)  # 0=invisible
         self.last_render = int(time.time())
 
