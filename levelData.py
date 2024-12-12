@@ -12,7 +12,7 @@ class LevelData:
                 line = file.readline()
                 for x in range(self.width):
                     match line[x]:
-                        case "=":
+                        case "o":
                             self.obstacles.append((x,y))
                         case "/":
                             self.exits.append((x,y))
