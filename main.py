@@ -11,7 +11,7 @@ from levelData import LevelData
 def arg_setup():
     parser = argparse.ArgumentParser(
         prog="Evacuation Simulator",
-        description="Watch how kind or mean people are in evacuations",
+        description="Watch how cooperative or not people are in evacuations",
     )
     parser.add_argument(
         "level_file",
@@ -23,10 +23,10 @@ def arg_setup():
         "output_dir",
         default="output",
         nargs="?",
-        help="Directory path where output files will be saved",
+        help="Directory where output files will be saved",
     )
     parser.add_argument("-f", "--fancy", action="store_true", help="Enable fancy renderer")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Disable rendering")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Disable rendering (precedence over -f)")
     return parser.parse_args()
 
 def main(args):
