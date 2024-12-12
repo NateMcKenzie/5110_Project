@@ -1,5 +1,6 @@
 # Running the program
 
+```
 usage: Evacuation Simulator [-h] [-f] [-q] [level_file] [output_dir]
 
 Watch how cooperative or not people are in evacuations
@@ -12,6 +13,7 @@ options:
   -h, --help   show this help message and exit
   -f, --fancy  Enable fancy renderer
   -q, --quiet  Disable rendering (precedence over -f)
+```
 
 example command:
 `python main.py -f levels/funnel5050.lvl funnel5050_output`
