@@ -15,7 +15,7 @@ def arg_setup():
     )
     parser.add_argument(
         "level_file",
-        default="levels/ladder.lvl",
+        default="levels/ladder5050.lvl",
         nargs="?",
         help="Level file to use",
     )

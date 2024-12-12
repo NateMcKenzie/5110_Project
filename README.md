@@ -1,3 +1,9 @@
+# Overview
+This program will be used to simulate a crowd evacuating. It has logging features to see behavior and statistics over
+time. It has the capability to read in level files describing a room's layout and the composition of the crowd. Default
+output will be in a directory called `output`, so look there for graphs and logs. The default level file is
+`levels/funnel5050.lvl`.
+
 # Running the program
 
 ```
