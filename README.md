@@ -19,6 +19,7 @@ options:
   -h, --help   show this help message and exit
   -f, --fancy  Enable fancy renderer
   -q, --quiet  Disable rendering (precedence over -f)
+  -l, --lean   Disable plotting
 ```
 
 example command:
@@ -38,6 +39,11 @@ cooperation_rate
 ```
 After that, level data is provided in the same format as the basic renderer would show it, wihtout any agents.
 
-# Generate.sh
-It may not work on all systems, but I wanted to be able to quickly generate plots for all available level files.
-`generate.sh` does this, simply run it and let it work.
+# Shell files
+I have included some shell files I used to quickly generate and parse some interesting numbers. They are made to work
+with any system with a POSIX compliant `sh` program. So far as I know, this does not include Windows. However, if you do 
+have the capability, I think they're pretty cool.
+* `generate.sh` : Runs every level in `levels/` and stores their outputs in a `generated` folder.
+* `mega_generate.sh` : Like `generate.sh`, but runs each level 30 times using all available cores.
+* `extract_times.sh` : Extracts only the time taken to fully evacuate from a `generated` folder, matching input levels
+to results.
