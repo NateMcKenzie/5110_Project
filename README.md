@@ -45,5 +45,4 @@ with any system with a POSIX compliant `sh` program. So far as I know, this does
 have the capability, I think they're pretty cool.
 * `generate.sh` : Runs every level in `levels/` and stores their outputs in a `generated` folder.
 * `mega_generate.sh` : Like `generate.sh`, but runs each level 30 times using all available cores.
-* `extract_times.sh` : Extracts only the time taken to fully evacuate from a `generated` folder, matching input levels
-to results.
+* `extract_times.sh` : Extracts data from `generated` folder into a csv. To be used with google sheet to analyze data.
