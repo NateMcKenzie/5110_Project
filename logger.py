@@ -30,6 +30,8 @@ class Logger:
                 print(f"Mean: {self.__defect_history[i]}", file=log)
                 print(f"Evacuated: {self.__evac_history[i]}", file=log)
             print(f"Simulation ended in {len(self.__coop_history)} steps", file=log)
+            print(f"There are {self.__total_history[-1]} remaining agents", file=log)
+
         if not self.__lean:
             self.plot()
 
