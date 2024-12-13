@@ -151,8 +151,16 @@ class Simulator:
             
     def reevaluate(self, agent, attempt, chance):
         # Calculate formula for reevaluating strategy
-        M_x = (1 / self.exit_distances[agent.position[0]][agent.position[1]]) * chance
-        M_y = (1 / self.exit_distances[attempt[0]][attempt[1]]) * chance
+        exit_distance_real = self.exit_distances[agent.position[1]][agent.position[0]]
+        exit_distance_attempt = self.exit_distances[attempt[1]][attempt[0]]
+        if exit_distance_real > 0:
+            M_x = (1 / exit_distance_real) * chance
+        else:
+            M_x = 1_000_000 * chance
+        if exit_distance_real > 0:
+            M_y = (1 / exit_distance_attempt) * chance
+        else:
+            M_y = 1_000_000 * chance
         W = 1 / (1 + math.exp((M_x - M_y) / self.K))
 
         random_num = random.random()
