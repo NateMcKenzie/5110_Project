@@ -5,12 +5,13 @@ from pathlib import Path
 
 
 class Logger:
-    def __init__(self, log_path):
+    def __init__(self, log_path, lean):
         self.__log_path = Path(log_path)
         self.__coop_history = []
         self.__defect_history = []
         self.__total_history = []
         self.__evac_history = []
+        self.__lean = lean
 
         if not os.path.exists(log_path):
             os.makedirs(log_path)
@@ -28,6 +29,9 @@ class Logger:
                 print(f"Kind: {self.__coop_history[i]}", file=log)
                 print(f"Mean: {self.__defect_history[i]}", file=log)
                 print(f"Evacuated: {self.__evac_history[i]}", file=log)
+            print(f"Simulation ended in {len(self.__coop_history)} steps", file=log)
+        if not self.__lean:
+            self.plot()
 
     def plot(self):
         """

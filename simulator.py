@@ -5,6 +5,7 @@ import itertools as it
 class Simulator:
     def __init__(self, level_data):
         self.P = 25
+        self.K = 0.1
         self.coop_rate = level_data.coop_rate
         self.width = level_data.width
         self.height = level_data.height
@@ -79,19 +80,19 @@ class Simulator:
         for position, agents in attempted_moves.items():
             # Decide which agent moves
             agents = attempted_moves[position]
-            moving_agent = self.game(agents)
+            moving_agent, probs = self.game(agents)
 
             # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
-            for agent in agents:
-                if agent == moving_agent:
+            for i in range(len(agents)):
+                if agents[i] == moving_agent:
                     if position not in self.exits:
-                        self.move(agent, position)
+                        self.move(agents[i], position)
                        #print(f"{agent} moves")
                     else:
-                        self.evacuate_agent(agent)
+                        self.evacuate_agent(agents[i])
                        #print(f"{agent} evacuates")
                 else:
-                    self.reevaluate(agent)
+                    self.reevaluate(agents[i], position, probs[i])
 
         self.count_states()
         
@@ -128,7 +129,7 @@ class Simulator:
     # Returns None if no agent moves
     def game(self, agents):
         if len(agents) == 1:
-            return agents[0]
+            return (agents[0], (1))
 
         num_cooperate = 0
         num_defect = 0
@@ -146,12 +147,16 @@ class Simulator:
             
         probs.append(1.0 - sum(probs)) # Probability that no one moves
         choices = agents + [None]
-        return random.choices(choices, weights=probs)[0]
+        return (random.choices(choices, weights=probs)[0], probs)
             
-    def reevaluate(self, agent):
+    def reevaluate(self, agent, attempt, chance):
         # Calculate formula for reevaluating strategy
+        M_x = (1 / self.exit_distances[agent.position[0]][agent.position[1]]) * chance
+        M_y = (1 / self.exit_distances[attempt[0]][attempt[1]]) * chance
+        W = 1 / (1 + math.exp((M_x - M_y) / self.K))
+
         random_num = random.random()
-        if random_num > 0.2: # Only change with 20% probability TODO: use actual formula
+        if random_num <= W: # Change with W probability
             if agent.strategy == "cooperate":
                 agent.strategy = "defect"
             elif agent.strategy == "defect":

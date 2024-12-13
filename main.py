@@ -27,6 +27,7 @@ def arg_setup():
     )
     parser.add_argument("-f", "--fancy", action="store_true", help="Enable fancy renderer")
     parser.add_argument("-q", "--quiet", action="store_true", help="Disable rendering (precedence over -f)")
+    parser.add_argument("-l", "--lean", action="store_true", help="Disable plotting")
     return parser.parse_args()
 
 def main(args):
@@ -38,7 +39,7 @@ def main(args):
         renderer = FancyRenderer(simulator.width, simulator.height)
     else:
         renderer = BasicRenderer()
-    logger = Logger(args.output_dir)
+    logger = Logger(args.output_dir, args.lean)
     
     renderer.render(simulator, 0)
 
@@ -51,7 +52,6 @@ def main(args):
 
 
     logger.save()
-    logger.plot()
 
 
 if __name__ == "__main__":
