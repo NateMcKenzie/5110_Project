@@ -1,7 +1,7 @@
 # First 2 numbers: width x height. Next 2: agent count and round count. Last line: cooperation rate
 30 30
-150 150
-0.5
+75 150
+0.9
 oooooooooooooooooooooooooooooo
 /............................/
 o....ooo..............ooo....o
