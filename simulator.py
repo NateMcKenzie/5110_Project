@@ -156,11 +156,11 @@ class Simulator:
         if exit_distance_real > 0:
             M_x = (1 / exit_distance_real) * chance
         else:
-            M_x = 1_000_000 * chance
-        if exit_distance_real > 0:
+            M_x = 2 * chance
+        if exit_distance_attempt > 0:
             M_y = (1 / exit_distance_attempt) * chance
         else:
-            M_y = 1_000_000 * chance
+            M_y = 2 * chance
         W = 1 / (1 + math.exp((M_x - M_y) / self.K))
 
         random_num = random.random()

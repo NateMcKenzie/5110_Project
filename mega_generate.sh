@@ -31,7 +31,10 @@ for file in $(ls levels); do
             python main.py "levels/$file" "generated/${file}_$i" -ql &
         done
         wait
+        echo "Completed $file"
     ) &
+
 done
 
 wait
+echo "All done"
