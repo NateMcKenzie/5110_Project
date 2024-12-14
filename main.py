@@ -3,7 +3,6 @@ import argparse
 from simulator import Simulator
 from quietRenderer import QuietRenderer
 from basicRenderer import BasicRenderer
-from fancyRenderer import FancyRenderer
 from logger import Logger
 from levelData import LevelData
 
@@ -36,7 +35,11 @@ def main(args):
     if args.quiet:
         renderer = QuietRenderer()
     elif args.fancy:
-        renderer = FancyRenderer(simulator.width, simulator.height)
+        try:
+            from fancyRenderer import FancyRenderer
+            renderer = FancyRenderer(simulator.width, simulator.height)
+        except ModuleNotFoundError:
+            raise RuntimeError("You cannot use Fancy Rendering without installing curses")
     else:
         renderer = BasicRenderer()
     logger = Logger(args.output_dir, args.lean)

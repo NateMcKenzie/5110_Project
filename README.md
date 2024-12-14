@@ -25,6 +25,10 @@ options:
 example command:
 `python main.py -f levels/funnel5050.lvl funnel5050_output`
 
+# Matplot
+This program uses `matplotlib` as it was used in an assignment earlier in the course, this shouldn't be a problem. If it
+is, it can be remedied with `pip install matplotlib`.
+
 # Fancy Rendering
 If using FancyRender to render, you need to have curses. On Linux, you probably have it. On Windows, you will need to
 get one somehow. Easiest solution: `pip install windows-curses`
