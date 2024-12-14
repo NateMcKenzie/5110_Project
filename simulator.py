@@ -4,35 +4,43 @@ import itertools as it
 
 class Simulator:
     def __init__(self, level_data):
-        self.P = 25
-        self.K = 0.1
+        self.P = 2.5   # Penalty for defecting
+        self.Kf = 10.0 # Pedestrians' familiarity with the exit 
+        self.D = 1     # Inertia
+        self.K = 0.1   # Irrationality
+        
         self.coop_rate = level_data.coop_rate
         self.width = level_data.width
         self.height = level_data.height
-        self.agents = {}
+        self.agents = dict()
         self.neighboring = dict() # position: neighboring accessible cells (8 cells; accounting for walls and obstacles; may be out of bounds (for escaping))
         self.empty = set([(x, y) for x in range(self.width) for y in range(self.height) if (x, y) not in level_data.obstacles])
         self.obstacles = set(level_data.obstacles)
         self.exits = set(level_data.exits)
-        self.exit_distances = [[self.calc_exit_distance(x, y) for x in range(self.width)] for y in range(self.height)]
+        self.static_field_values = dict()
         self.evacuated = set() # All evacuated agents
         self.over = False
 
-
-        for (x, y) in it.product(range(self.width), range(self.height)):
-            self.compute_neighboring((x, y))
+        for position in it.product(range(self.width), range(self.height)):
+            self.compute_neighboring(position)
+            if position not in self.obstacles:
+                self.compute_static_field_value(position)
 
         self.populate(level_data.num_agents)
 
         # Stats and logging
         self.count_states()
 
-
-    def calc_exit_distance(self, x, y):
-        if (x, y) in self.obstacles:
+    def calc_exit_distance(self, position):
+        if position in self.obstacles:
             return float("inf")
-        distances = [math.sqrt((exit_pos[0]-x)**2 + (exit_pos[1]-y)**2) for exit_pos in self.exits]
+        distances = [math.sqrt((exit_pos[0]-position[0])**2 + (exit_pos[1]-position[1])**2) for exit_pos in self.exits]
         return min(distances)
+        
+    def compute_static_field_value(self, position):
+        distance = self.calc_exit_distance(position)
+        # Set the static field value of exits to infinity
+        self.static_field_values[position] = 1 / distance if distance != 0 else float("inf") 
         
     def populate(self, num_agents):
         positions = random.sample(list(self.empty), num_agents)
@@ -80,35 +88,33 @@ class Simulator:
         for position, agents in attempted_moves.items():
             # Decide which agent moves
             agents = attempted_moves[position]
-            moving_agent, probs = self.game(agents)
-
+            moving_agent = self.game(agents)
+            
+            # Keep track of the strategies used in this particular game for reevaluation.
+            strategies = [agent.strategy for agent in agents]
+            num_cooperate = strategies.count("cooperate")
+            num_defect = strategies.count("defect")
+            
             # Move successful agent (if one exists) and reevaluate the strategies of every agent who fail
-            for i in range(len(agents)):
-                if agents[i] == moving_agent:
+            for agent in agents:
+                if agent == moving_agent:
                     if position not in self.exits:
-                        self.move(agents[i], position)
-                       #print(f"{agent} moves")
+                        self.move(agent, position)
                     else:
-                        self.evacuate_agent(agents[i])
-                       #print(f"{agent} evacuates")
+                        self.evacuate_agent(agent)
                 else:
-                    self.reevaluate(agents[i], position, probs[i])
+                    self.reevaluate(agent, num_cooperate, num_defect)
 
         self.count_states()
         
     # Choose a neighboring cell to attempt to move to
-    # TODO: Implement smarter pathing logic
     def choose_move(self, agent):
         available_moves = [cell for cell in self.neighboring[agent.position] if cell in self.empty]
-        if len(available_moves) == 0:
-            return None
-        exit_moves = [cell for cell in available_moves if cell in self.exits]
-        if len(exit_moves) > 0: # Move to exit if available
-            return random.choice(exit_moves)
-        ranking = sorted(available_moves, key=lambda move: self.exit_distances[move[1]][move[0]], reverse=True)
-        weight = [(ranking.index(move) + 1)**1.2 for move in available_moves]
-        choice = random.choices(available_moves, weights=weight)
-        return choice[0]
+        available_exits = [move for move in available_moves if move in self.exits]
+        if len(available_exits) > 0:
+            return random.choice(available_exits) # Move to a random adjacent exit if one is available
+        weights = [math.exp(self.Kf * self.static_field_values[move]) for move in available_moves]
+        return random.choices(available_moves, weights=weights)[0]
         
     def move(self, agent, position):
         self.empty.add(agent.position)
@@ -125,50 +131,57 @@ class Simulator:
         if len(self.agents) == 0:
             self.over = True
             
-    # Returns the agent that moves into the square
-    # Returns None if no agent moves
+    # Computes the index of the strategy that is the winner in a prisoner's dilemma game
+    # Strategies are passed in as a tuple of strings
+    # Returns the index of the agent that moves
+    # Returns -1 if no agents move
+    # Also returns probability distribution
     def game(self, agents):
-        if len(agents) == 1:
-            return (agents[0], (1))
-
-        num_cooperate = 0
-        num_defect = 0
-        for agent in agents:
-            if agent.strategy == "cooperate":
-                num_cooperate += 1
-            elif agent.strategy == "defect":
-                num_defect += 1
-        if num_defect == 0:
-            probs = [1.0 / num_cooperate for agent in agents]
-        elif num_defect == 1:
-            probs = [0.0 if agent.strategy == "cooperate" else 1.0 for agent in agents]
-        else:
-            probs = [1.0 / num_defect ** self.P for agent in agents]
-            
-        probs.append(1.0 - sum(probs)) # Probability that no one moves
+        strategies = [agent.strategy for agent in agents]
+        num_cooperate = strategies.count("cooperate")
+        num_defect = strategies.count("defect")
+        
+        cooperate_prob = self.utility("cooperate", num_cooperate, num_defect)
+        defect_prob = self.utility("defect", num_cooperate, num_defect)
+        probs = [cooperate_prob if agent.strategy == "cooperate" else defect_prob for agent in agents]
+        probs.append(1.0 - sum(probs)) # Probability that no agent is chosen
+        
         choices = agents + [None]
-        return (random.choices(choices, weights=probs)[0], probs)
+        return random.choices(choices, weights=probs)[0]
+        
+    # Compute the utility (probability of moving) of a strategy in a game 
+    # with a given number of cooperating and defecting players (including the given strategy)
+    def utility(self, strategy, num_cooperate, num_defect):
+        if num_defect == 0:
+            return 1 / num_cooperate
+        elif strategy == "cooperate":
+            return 0.0
+        elif num_defect == 1:
+            return 1.0
+        else:
+            return 1.0 / num_defect ** self.P
             
-    def reevaluate(self, agent, attempt, chance):
+    # Agents will reevaluate their strategies based on their expected utility from their last game,
+    # with and without changing their strategy
+    # The strategies from the last game are passed in
+    def reevaluate(self, agent, num_cooperate, num_defect):
         # Calculate formula for reevaluating strategy
-        exit_distance_real = self.exit_distances[agent.position[1]][agent.position[0]]
-        exit_distance_attempt = self.exit_distances[attempt[1]][attempt[0]]
-        if exit_distance_real > 0:
-            M_x = (1 / exit_distance_real) * chance
+        M_x = self.utility(agent.strategy, num_cooperate, num_defect)
+        
+        if agent.strategy == "cooperate":
+            other_strategy = "defect"
+            num_cooperate -= 1
+            num_defect += 1
         else:
-            M_x = 2 * chance
-        if exit_distance_attempt > 0:
-            M_y = (1 / exit_distance_attempt) * chance
-        else:
-            M_y = 2 * chance
-        W = 1 / (1 + math.exp((M_x - M_y) / self.K))
-
+            other_strategy = "cooperate"
+            num_cooperate += 1
+            num_defect -= 1
+        M_y = self.utility(other_strategy, num_cooperate, num_defect)
+            
+        W = 1.0 / (1.0 + math.exp((M_x - M_y) / self.K))
         random_num = random.random()
         if random_num <= W: # Change with W probability
-            if agent.strategy == "cooperate":
-                agent.strategy = "defect"
-            elif agent.strategy == "defect":
-                agent.strategy = "cooperate"
+            agent.change_strategy() # Change strategy back
 
     def count_states(self):
         self.coop_count = 0
@@ -186,3 +199,9 @@ class Agent:
         
     def __repr__(self):
         return f"Agent {self.strategy} {self.position}"
+        
+    def change_strategy(self):
+        if self.strategy == "cooperate":
+            self.strategy = "defect"
+        else:
+            self.strategy = "cooperate"
