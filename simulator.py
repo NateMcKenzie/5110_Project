@@ -131,11 +131,8 @@ class Simulator:
         if len(self.agents) == 0:
             self.over = True
             
-    # Computes the index of the strategy that is the winner in a prisoner's dilemma game
-    # Strategies are passed in as a tuple of strings
-    # Returns the index of the agent that moves
-    # Returns -1 if no agents move
-    # Also returns probability distribution
+    # Determines the winner of a prisoner's dilemma game to determine which agent moves into a cell
+    # Returns the moving agent, or None if none of the agents moved
     def game(self, agents):
         strategies = [agent.strategy for agent in agents]
         num_cooperate = strategies.count("cooperate")
