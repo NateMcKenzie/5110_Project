@@ -58,6 +58,7 @@ class Simulator:
         else:
             print(f"Cannot create agent at nonempty position {position}")
 
+    # Compute all neighboring available cells in the Moore neighborhood
     def compute_neighboring(self, position):
         if not self.is_in_bounds(position):
             return
@@ -110,6 +111,8 @@ class Simulator:
     # Choose a neighboring cell to attempt to move to
     def choose_move(self, agent):
         available_moves = [cell for cell in self.neighboring[agent.position] if cell in self.empty]
+        if len(available_moves) == 0:
+            return None
         available_exits = [move for move in available_moves if move in self.exits]
         if len(available_exits) > 0:
             return random.choice(available_exits) # Move to a random adjacent exit if one is available
